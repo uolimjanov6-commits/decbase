@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decbase - Strategic Business Consulting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sage-green: #8B9A7A;
+            --warm-beige: #F5F1E8;
+            --deep-navy: #2C3E50;
+            --soft-gray: #F8F9FA;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--warm-beige) 0%, #ffffff 50%, var(--soft-gray) 100%);
+            min-height: 100vh;
+        }
+        
+        .font-display { font-family: 'Playfair Display', serif; }
+        .font-accent { font-family: 'Space Grotesk', sans-serif; }
+        
+        .hero-bg {
+            background: url('resources/hero-bg.png') center/cover;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(139, 154, 122, 0.1) 0%, rgba(245, 241, 232, 0.2) 100%);
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .service-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-8px) rotateX(5deg) rotateY(5deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .portfolio-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .portfolio-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--sage-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--sage-green), #7a8a6a);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 154, 122, 0.4);
+        }
+        
+        .reveal-element {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .reveal-element.revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+        }
+        
+        .filter-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background: var(--sage-green);
+            color: white;
+        }
+        
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="font-display text-2xl font-bold text-gray-900">
+                    Decbase
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-link active text-gray-900 hover:text-sage-green">Home</a>
+                    <a href="about.html" class="nav-link text-gray-700 hover:text-sage-green">About</a>
+                    <a href="services.html" class="nav-link text-gray-700 hover:text-sage-green">Services</a>
+                    <a href="contact.html" class="nav-link text-gray-700 hover:text-sage-green">Contact</a>
+                </div>
+                <button class="md:hidden" id="mobile-menu-btn">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
+                <a href="index.html" class="block px-3 py-2 text-gray-900">Home</a>
+                <a href="about.html" class="block px-3 py-2 text-gray-700">About</a>
+                <a href="services.html" class="block px-3 py-2 text-gray-700">Services</a>
+                <a href="contact.html" class="block px-3 py-2 text-gray-700">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center relative">
+        <div class="floating-shapes" id="floating-shapes"></div>
+        <div class="hero-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h1 class="font-display text-5xl lg:text-7xl font-bold text-gray-900 mb-6">
+                        <span id="typed-text"></span>
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                        We transform businesses through strategic consulting, innovative solutions, 
+                        and data-driven insights that drive sustainable growth and competitive advantage.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button class="btn-primary text-white px-8 py-4 rounded-lg font-semibold text-lg">
+                            Start Your Transformation
+                        </button>
+                        <button class="border-2 border-sage-green text-sage-green px-8 py-4 rounded-lg font-semibold text-lg hover:bg-sage-green hover:text-white transition-all duration-300">
+                            View Our Work
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="resources/consulting-hero.png" alt="Business Consultation" class="rounded-2xl shadow-2xl w-full">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h2 class="font-display text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+                    Our Services
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Comprehensive business solutions tailored to your unique challenges and growth objectives.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 reveal-element">
+                    <div class="w-16 h-16 bg-sage-green/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-sage-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-display text-2xl font-semibold text-gray-900 mb-4">Strategic Planning</h3>
+                    <p class="text-gray-600 mb-6">Develop comprehensive business strategies that align with your vision and market opportunities.</p>
+                    <a href="services.html" class="text-sage-green font-semibold hover:text-sage-green/80 transition-colors">
+                        Learn More →
+                    </a>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 reveal-element">
+                    <div class="w-16 h-16 bg-sage-green/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-sage-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-display text-2xl font-semibold text-gray-900 mb-4">Digital Transformation</h3>
+                    <p class="text-gray-600 mb-6">Modernize your operations with cutting-edge technology and digital-first approaches.</p>
+                    <a href="services.html" class="text-sage-green font-semibold hover:text-sage-green/80 transition-colors">
+                        Learn More →
+                    </a>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 reveal-element">
+                    <div class="w-16 h-16 bg-sage-green/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-sage-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-display text-2xl font-semibold text-gray-900 mb-4">Data Analytics</h3>
+                    <p class="text-gray-600 mb-6">Leverage data insights to make informed decisions and drive business performance.</p>
+                    <a href="services.html" class="text-sage-green font-semibold hover:text-sage-green/80 transition-colors">
+                        Learn More →
+                    </a>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 reveal-element">
+                    <div class="w-16 h-16 bg-sage-green/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-sage-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-display text-2xl font-semibold text-gray-900 mb-4">Change Management</h3>
+                    <p class="text-gray-600 mb-6">Guide your organization through transitions with minimal disruption and maximum adoption.</p>
+                    <a href="services.html" class="text-sage-green font-semibold hover:text-sage-green/80 transition-colors">
+                        Learn More →
+                    </a>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 reveal-element">
+                    <div class="w-16 h-16 bg-sage-green/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-sage-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-display text-2xl font-semibold text-gray-900 mb-4">Process Optimization</h3>
+                    <p class="text-gray-600 mb-6">Streamline operations and eliminate inefficiencies to maximize productivity and reduce costs.</p>
+                    <a href="services.html" class="text-sage-green font-semibold hover:text-sage-green/80 transition-colors">
+                        Learn More →
+                    </a>
+                </div>
+
+                <div class="service-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100 reveal-element">
+                    <div class="w-16 h-16 bg-sage-green/10 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-sage-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-display text-2xl font-semibold text-gray-900 mb-4">Innovation Strategy</h3>
+                    <p class="text-gray-600 mb-6">Foster innovation and develop breakthrough solutions to stay ahead of market trends.</p>
+                    <a href="services.html" class="text-sage-green font-semibold hover:text-sage-green/80 transition-colors">
+                        Learn More →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h2 class="font-display text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+                    Our Portfolio
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Explore our successful projects and see how we've helped businesses achieve their goals.
+                </p>
+            </div>
+
+            <!-- Portfolio Filters -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12 reveal-element">
+                <button class="filter-btn active px-6 py-3 rounded-full border border-gray-300 font-semibold" data-filter="all">
+                    All Projects
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full border border-gray-300 font-semibold" data-filter="strategy">
+                    Strategy
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full border border-gray-300 font-semibold" data-filter="digital">
+                    Digital
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full border border-gray-300 font-semibold" data-filter="analytics">
+                    Analytics
+                </button>
+            </div>
+
+            <!-- Portfolio Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="portfolio-grid">
+                <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg" data-category="strategy">
+                    <img src="https://kimi-web-img.moonshot.cn/img/interiordesign.net/fcd654c85f0d6e2747b43dcfc7adf2de7a3c3962.jpg" alt="Modern Workspace" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-display text-xl font-semibold text-gray-900 mb-2">Global Expansion Strategy</h3>
+                        <p class="text-gray-600 mb-4">Helped a tech startup expand into 5 new markets with a comprehensive growth strategy.</p>
+                        <span class="text-sage-green font-semibold">Strategy • Growth</span>
+                    </div>
+                </div>
+
+                <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg" data-category="digital">
+                    <img src="https://kimi-web-img.moonshot.cn/img/bodaq.com/e39ec51172f10be8b745a7b85ec9ea12186334a3.png" alt="Digital Transformation" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-display text-xl font-semibold text-gray-900 mb-2">Digital Transformation</h3>
+                        <p class="text-gray-600 mb-4">Transformed traditional manufacturing processes with IoT and automation solutions.</p>
+                        <span class="text-sage-green font-semibold">Digital • Technology</span>
+                    </div>
+                </div>
+
+                <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg" data-category="analytics">
+                    <img src="https://kimi-web-img.moonshot.cn/img/www.andacademy.com/d39b42cbbf49b9a70267da730ab910fbc4290905.webp" alt="Data Analytics" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-display text-xl font-semibold text-gray-900 mb-2">Data-Driven Insights</h3>
+                        <p class="text-gray-600 mb-4">Implemented advanced analytics platform resulting in 40% improvement in decision-making speed.</p>
+                        <span class="text-sage-green font-semibold">Analytics • Insights</span>
+                    </div>
+                </div>
+
+                <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg" data-category="strategy">
+                    <img src="https://kimi-web-img.moonshot.cn/img/officebanao.com/9b033f1873723a8743b9d09c6fedf543a5d6c9b3.jpg" alt="Strategic Planning" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-display text-xl font-semibold text-gray-900 mb-2">Market Entry Strategy</h3>
+                        <p class="text-gray-600 mb-4">Developed comprehensive market entry plan for retail chain expanding internationally.</p>
+                        <span class="text-sage-green font-semibold">Strategy • Market Entry</span>
+                    </div>
+                </div>
+
+                <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg" data-category="digital">
+                    <img src="https://kimi-web-img.moonshot.cn/img/img.freepik.com/667a747d20091e0e044e31d21a0e782e0d4fa635.jpg" alt="Digital Innovation" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-display text-xl font-semibold text-gray-900 mb-2">Innovation Platform</h3>
+                        <p class="text-gray-600 mb-4">Built digital innovation platform enabling rapid prototyping and testing of new ideas.</p>
+                        <span class="text-sage-green font-semibold">Digital • Innovation</span>
+                    </div>
+                </div>
+
+                <div class="portfolio-item bg-white rounded-2xl overflow-hidden shadow-lg" data-category="analytics">
+                    <img src="https://kimi-web-img.moonshot.cn/img/cargaison-brands.stream.prepr.io/88d926c4c0f3d74b6863fa44b151de8a9c763e19.jpg" alt="Performance Analytics" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-display text-xl font-semibold text-gray-900 mb-2">Performance Optimization</h3>
+                        <p class="text-gray-600 mb-4">Used predictive analytics to optimize supply chain and reduce costs by 25%.</p>
+                        <span class="text-sage-green font-semibold">Analytics • Optimization</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16 reveal-element">
+                <h2 class="font-display text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+                    What Our Clients Say
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Hear from the leaders who have transformed their businesses with our expertise.
+                </p>
+            </div>
+
+            <div class="splide" id="testimonials-slider">
+                <div class="splide__track">
+                    <ul class="splide__list">
+                        <li class="splide__slide">
+                            <div class="testimonial-card p-8 rounded-2xl mx-4">
+                                <div class="flex items-center mb-6">
+                                    <img src="https://kimi-web-img.moonshot.cn/img/www.roffeypark.com/54794aaf1d10f0869e4664e637cd10eadb3a2f5f.jpg" alt="Client" class="w-16 h-16 rounded-full object-cover mr-4">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Sarah Johnson</h4>
+                                        <p class="text-gray-600">CEO, TechVision Inc.</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-lg leading-relaxed">
+                                    "Decbase transformed our entire approach to market expansion. Their strategic insights and data-driven methodology helped us enter three new markets with confidence and achieve 150% growth in just 18 months."
+                                </p>
+                                <div class="flex text-yellow-400 mt-4">
+                                    ★★★★★
+                                </div>
+                            </div>
+                        </li>
+                        <li class="splide__slide">
+                            <div class="testimonial-card p-8 rounded-2xl mx-4">
+                                <div class="flex items-center mb-6">
+                                    <img src="https://kimi-web-img.moonshot.cn/img/assets.td.org/c1de3d8aa6397759ac9d89b246598b0110911fdd.png" alt="Client" class="w-16 h-16 rounded-full object-cover mr-4">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Michael Chen</h4>
+                                        <p class="text-gray-600">COO, Manufacturing Solutions</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-lg leading-relaxed">
+                                    "The digital transformation strategy developed by Decbase revolutionized our operations. We reduced costs by 30% while improving efficiency and employee satisfaction across all departments."
+                                </p>
+                                <div class="flex text-yellow-400 mt-4">
+                                    ★★★★★
+                                </div>
+                            </div>
+                        </li>
+                        <li class="splide__slide">
+                            <div class="testimonial-card p-8 rounded-2xl mx-4">
+                                <div class="flex items-center mb-6">
+                                    <img src="https://kimi-web-img.moonshot.cn/img/gustavconcept.com/1056105ad8c8a938f668239d4d5c8507d03e4b5a.jpg" alt="Client" class="w-16 h-16 rounded-full object-cover mr-4">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Emily Rodriguez</h4>
+                                        <p class="text-gray-600">Director of Operations, Global Retail</p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-700 text-lg leading-relaxed">
+                                    "Decbase didn't just provide recommendations – they became true partners in our success. Their change management approach ensured smooth adoption across our 500+ employee organization."
+                                </p>
+                                <div class="flex text-yellow-400 mt-4">
+                                    ★★★★★
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-sage-green to-sage-green/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="reveal-element">
+                <h2 class="font-display text-4xl lg:text-5xl font-bold text-white mb-6">
+                    Ready to Transform Your Business?
+                </h2>
+                <p class="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
+                    Let's discuss how we can help you achieve your business goals with our proven strategies and expertise.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="contact.html" class="bg-white text-sage-green px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all duration-300">
+                        Get Started Today
+                    </a>
+                    <a href="services.html" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-sage-green transition-all duration-300">
+                        Explore Services
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <div class="font-display text-2xl font-bold mb-4">Decbase</div>
+                    <p class="text-gray-400 mb-4">
+                        Strategic business consulting that drives transformation and sustainable growth.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Services</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="services.html" class="hover:text-white transition-colors">Strategic Planning</a></li>
+                        <li><a href="services.html" class="hover:text-white transition-colors">Digital Transformation</a></li>
+                        <li><a href="services.html" class="hover:text-white transition-colors">Data Analytics</a></li>
+                        <li><a href="services.html" class="hover:text-white transition-colors">Change Management</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Company</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="about.html" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="about.html" class="hover:text-white transition-colors">Our Team</a></li>
+                        <li><a href="about.html" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Contact</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li>123 Business Ave</li>
+                        <li>San Francisco, CA 94105</li>
+                        <li>hello@decbase.com</li>
+                        <li>(555) 123-4567</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Decbase. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="portfolio-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-display text-2xl font-bold text-gray-900" id="modal-title"></h3>
+                <button class="text-gray-500 hover:text-gray-700" id="close-modal">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
